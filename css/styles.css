@@ -1,0 +1,99 @@
+/* CONFIGURACIÓN GENERAL */
+body {
+    background-color: #f6f0e1;
+    color: #5a4b3b;
+    font-family: "Josefin Sans", sans-serif;
+}
+
+.texto-bordeo {
+    color: #800020;
+    font-family: "Playfair Display", serif;
+}
+
+/* NAVBAR */
+.navbar-vino {
+    background: linear-gradient(135deg, #5b0e1f 0%, #3b0a14 100%);
+}
+.nav-link-vino {
+    color: #e8c9d0 !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+.nav-link-vino:hover { color: #f5d98b !important; }
+
+/* LOGO */
+.brand-name { font-family: "Great Vibes", cursive; font-size: 2.2rem; color: #f5d98b; line-height: 1; }
+.brand-sub { font-size: 0.6rem; letter-spacing: 3px; color: #d4a5b0; text-transform: uppercase; }
+
+/* JUMBOTRON & CAROUSEL */
+.jumbo-container {
+    background: rgb(216, 239, 241);
+    padding: 2.5rem;
+    border-radius: 20px;
+    margin-top: 2rem;
+    border: 1px solid #d4a5b0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.hr-personalizado{
+   width: 60px; 
+   border: 2px solid #800020; 
+   opacity: 1;
+}
+.jumbo-header { border-left: 5px solid #800020; padding-left: 20px; }
+.carousel-jumbo { border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.carousel-jumbo img { height: 400px; object-fit: cover; }
+
+/* CARDS */
+.card-custom {
+    background: rgb(216, 239, 241);
+    border: none;
+    border-radius: 15px;
+    transition: 0.3s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.card-custom:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(128, 0, 32, 0.1); }
+.card-custom img { height: 200px; object-fit: cover; }
+
+/* BOTONES */
+.btn-bordeo { background-color: #800020; color: white; border: none; }
+.btn-bordeo:hover { background-color: #5b0e1f; color: #f5d98b; }
+
+/* FOOTER */
+/* ===========================
+   FOOTER COMPACTO (Estilo Header)
+=========================== */
+.footer-vino {
+    background: linear-gradient(135deg, #3b0a14 0%, #1a0408 100%);
+    color: #d4a5b0;
+    padding: 1rem 0; /* Misma dimensión que el header */
+    border-top: 2px solid #f5d98b;
+    margin-top: 50px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-text {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.footer-brand {
+    font-family: "Great Vibes", cursive;
+    color: #f5d98b;
+    font-size: 1.5rem;
+    text-decoration: none;
+}
+
+/* Ajuste para móviles */
+@media (max-width: 768px) {
+    .footer-container {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
