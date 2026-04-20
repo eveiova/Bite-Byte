@@ -478,7 +478,26 @@ $estados = [
         </div>
     </div>
 </div>
-
+<div class="container mb-5">
+    <div class="buscar-section text-center" style="padding: 2rem;">
+        <h3 class="texto-bordeo mb-3" style="font-family: 'Playfair Display', serif;">Encuéntranos</h3>
+        <p class="text-muted mb-4" style="font-size:0.95rem;">
+            📍 Estamos en: C/Benito Pérez Galdós
+        </p>
+        
+        <div style="width: 100%; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #f0e6ec;">
+            <iframe 
+                width="100%" 
+                height="400" 
+                frameborder="0" 
+                scrolling="no" 
+                marginheight="0" 
+                marginwidth="0" 
+                src="https://maps.google.com/maps?q=40.424488312165046,-3.564736952675174&hl=es&z=17&amp;output=embed">
+            </iframe>
+        </div>
+    </div>
+</div>
 <footer class="footer-vino shadow-sm">
     <div class="container footer-container">
         <a href="index.php" class="footer-brand">Casa Denise</a>

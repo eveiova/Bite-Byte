@@ -196,8 +196,8 @@ $estados = [
         <div class="d-flex align-items-center gap-3">
             <ul class="nav d-none d-md-flex">
                 <li><a href="index.php"        class="nav-link nav-link-vino">Inicio</a></li>
+                <li><a href="trabajos.php"     class="nav-link nav-link-vino">Trabajos</a></li>
                 <li><a href="productos.php"     class="nav-link nav-link-vino">Productos</a></li>
-                <li><a href="buscar_pedido.php" class="nav-link nav-link-vino">Estado Pedido</a></li>
             </ul>
             <span style="color:#e8c9d0; font-size:0.85rem;">
                 Hola, <strong style="color:#f5d98b;"><?= htmlspecialchars($usuario['nombre']) ?></strong>
