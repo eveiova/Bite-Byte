@@ -18,6 +18,12 @@ if (estaLogueado()) {
 
 $error = '';
 
+// Recoger redirect desde GET (ej: login.php?redirect=productos.php)
+if (!empty($_GET['redirect'])) {
+    $redir = basename($_GET['redirect']); // solo nombre de archivo, sin rutas
+    $_SESSION['redirect_after_login'] = $redir;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $email    = trim($_POST['email']    ?? '');
@@ -105,6 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 2.5rem 2rem 2rem;
             text-align: center;
             border-bottom: 3px solid #f5d98b;
+            cursor: pointer; /* Cambia el cursor a una 'mano' */
+            transition: opacity 0.2s ease; /* Transición suave */
+        }
+
+        /* Efecto al pasar el ratón por encima de la cabecera */
+        .login-card-header:hover {
+            opacity: 0.93;
         }
 
         .login-card-header .brand-name {
@@ -219,18 +232,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-wrapper">
     <div class="login-card">
 
-        <!-- Cabecera con la marca -->
-        <div class="login-card-header">
-            <div class="logo-brand-text">
-                <div class="brand-name">Casa Denise</div>
-                <div class="brand-sub">Laboratorio Dental</div>
+        <a href="index.php" style="text-decoration: none; color: inherit; display: block;">
+            <div class="login-card-header">
+                <div class="logo-brand-text">
+                    <div class="brand-name">Casa Denise</div>
+                    <div class="brand-sub">Laboratorio Dental</div>
+                </div>
+                <p class="mt-3 mb-0" style="color:#d4a5b0; font-size:0.82rem; letter-spacing:1px;">
+                    ACCESO A TU CUENTA
+                </p>
             </div>
-            <p class="mt-3 mb-0" style="color:#d4a5b0; font-size:0.82rem; letter-spacing:1px;">
-                ACCESO A TU CUENTA
-            </p>
-        </div>
+        </a>
 
-        <!-- Formulario -->
         <div class="login-card-body">
 
             <?php if ($error): ?>

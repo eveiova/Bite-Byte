@@ -303,16 +303,16 @@ $estados = [
 <!-- NAVBAR -->
 <header class="p-3 navbar-vino shadow-sm">
     <div class="container d-flex justify-content-between align-items-center">
-        <a href="index.html" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
+        <a href="index.php" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
             <div class="logo-brand-text">
                 <div class="brand-name">Casa Denise</div>
                 <div class="brand-sub">Laboratorio Dental</div>
             </div>
         </a>
         <ul class="nav d-none d-md-flex">
-            <li><a href="index.html"     class="nav-link nav-link-vino">Inicio</a></li>
-            <li><a href="trabajos.html"  class="nav-link nav-link-vino">Trabajos</a></li>
-            <li><a href="productos.html" class="nav-link nav-link-vino">Productos</a></li>
+            <li><a href="index.php"     class="nav-link nav-link-vino">Inicio</a></li>
+            <li><a href="trabajos.php"  class="nav-link nav-link-vino">Trabajos</a></li>
+            <li><a href="productos.php" class="nav-link nav-link-vino">Productos</a></li>
             <li><a href="login.php"      class="nav-link nav-link-vino">Mi cuenta</a></li>
         </ul>
     </div>
@@ -497,7 +497,7 @@ $estados = [
 
 <footer class="footer-vino shadow-sm">
     <div class="container footer-container">
-        <a href="index.html" class="footer-brand">Casa Denise</a>
+        <a href="index.php" class="footer-brand">Casa Denise</a>
         <p class="footer-text">© 2024 Laboratorio Dental - Todos los derechos reservados</p>
         <div class="footer-text">
             <span>📍 Calle Dental 123</span>

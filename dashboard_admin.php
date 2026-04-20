@@ -15,12 +15,12 @@ $usuario = usuarioActual();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pedido_id'], $_POST['nuevo_estado'])) {
     $pedido_id    = (int) $_POST['pedido_id'];
     $nuevo_estado = (int) $_POST['nuevo_estado'];
+    $notas        = trim($_POST['notas_inline'] ?? '');
 
     if ($pedido_id > 0 && in_array($nuevo_estado, [0, 1, 2, 3])) {
-        $stmt = $pdo->prepare("UPDATE pedidos SET estado = ? WHERE id = ?");
-        $stmt->execute([$nuevo_estado, $pedido_id]);
+        $stmt = $pdo->prepare("UPDATE pedidos SET estado = ?, notas = ? WHERE id = ?");
+        $stmt->execute([$nuevo_estado, $notas ?: null, $pedido_id]);
     }
-    // Redirigir para evitar reenvío del formulario al refrescar
     header('Location: dashboard_admin.php?ok=1');
     exit;
 }
@@ -58,6 +58,30 @@ $sql = "
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $pedidos = $stmt->fetchAll();
+
+// ── Items de todos los pedidos visibles ──────────────────────
+$items_por_pedido = [];
+if (!empty($pedidos)) {
+    $ids          = array_column($pedidos, 'id');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmt_items   = $pdo->prepare("
+        SELECT
+            pi.pedido_id,
+            pi.cantidad,
+            pi.precio_unitario,
+            c.nombre,
+            c.categoria,
+            c.descripcion
+        FROM pedido_items pi
+        JOIN catalogo c ON c.id = pi.catalogo_id
+        WHERE pi.pedido_id IN ($placeholders)
+        ORDER BY pi.id
+    ");
+    $stmt_items->execute($ids);
+    foreach ($stmt_items->fetchAll() as $item) {
+        $items_por_pedido[$item['pedido_id']][] = $item;
+    }
+}
 
 // ── Totales por estado (para las tarjetas resumen) ───────────
 $stmt_totales = $pdo->query("
@@ -228,6 +252,72 @@ $estados = [
             100% { opacity: 0; }
         }
 
+        /* ── Filas expandibles ── */
+        .fila-pedido {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .fila-pedido:hover   { background: #fdf8f2 !important; }
+        .fila-pedido.abierta { background: #fdf4f6 !important; }
+
+        .chevron {
+            display: inline-block;
+            transition: transform 0.25s;
+            font-size: 0.72rem;
+            color: #a07a8a;
+        }
+        .abierta .chevron { transform: rotate(180deg); }
+
+        .fila-detalle td {
+            padding: 0 !important;
+            border: none !important;
+            background: #fdf4f6;
+        }
+        .detalle-inner {
+            padding: 1.2rem 1.5rem 1.5rem 2.5rem;
+            border-bottom: 2px solid #ead8df;
+            animation: slideDown 0.2s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tabla de items dentro del detalle */
+        .tabla-items { width: 100%; font-size: 0.85rem; margin-top: 0.8rem; }
+        .tabla-items th {
+            font-size: 0.72rem; text-transform: uppercase;
+            letter-spacing: 1px; color: #a07a8a;
+            padding: 0.4rem 0.8rem;
+            border-bottom: 2px solid #ead8df; font-weight: 600;
+        }
+        .tabla-items td {
+            padding: 0.55rem 0.8rem;
+            border-bottom: 1px solid #f0e6ec;
+            color: #5a4b3b; vertical-align: middle;
+        }
+        .tabla-items tfoot td {
+            border-top: 2px solid #ead8df; border-bottom: none;
+            font-weight: 700; padding-top: 0.7rem;
+        }
+
+        /* Formulario de estado dentro del detalle */
+        .estado-form-inline {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #ead8df;
+        }
+        .estado-form-label {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #a07a8a;
+        }
+
         /* ── Admin badge en navbar ── */
         .admin-badge {
             background: #f5d98b;
@@ -253,7 +343,7 @@ $estados = [
 <!-- ── NAVBAR ── -->
 <header class="p-3 navbar-vino shadow-sm">
     <div class="container d-flex justify-content-between align-items-center">
-        <a href="index.html" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
+        <a href="index.php" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
             <div class="logo-brand-text">
                 <div class="brand-name">Casa Denise</div>
                 <div class="brand-sub">Laboratorio Dental</div>
@@ -341,20 +431,27 @@ $estados = [
             <table class="table tabla-pedidos mb-0">
                 <thead>
                     <tr>
+                        <th style="width:36px;"></th>
                         <th>#</th>
                         <th>Cliente</th>
                         <th>Fecha</th>
                         <th>Artículos</th>
                         <th>Total</th>
-                        <th>Notas</th>
-                        <th>Estado actual</th>
-                        <th>Cambiar estado</th>
+                        <th>Estado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($pedidos as $p): ?>
-                    <tr>
-                        <td><strong>#<?= $p['id'] ?></strong></td>
+                    <?php foreach ($pedidos as $p):
+                        $est   = $estados[$p['estado']];
+                        $items = $items_por_pedido[$p['id']] ?? [];
+                    ?>
+
+                    <!-- Fila principal -->
+                    <tr class="fila-pedido"
+                        id="fila-<?= $p['id'] ?>"
+                        onclick="toggleDetalle(<?= $p['id'] ?>)">
+                        <td class="text-center"><span class="chevron">▼</span></td>
+                        <td><strong style="color:#800020;">#<?= $p['id'] ?></strong></td>
                         <td>
                             <div style="font-weight:600; font-size:0.9rem;">
                                 <?= htmlspecialchars($p['nombre'] . ' ' . $p['apellido']) ?>
@@ -369,38 +466,106 @@ $estados = [
                                 <?= date('H:i', strtotime($p['created_at'])) ?>
                             </div>
                         </td>
-                        <td><?= $p['num_items'] ?> art.</td>
+                        <td><span style="color:#a07a8a;"><?= $p['num_items'] ?> art.</span></td>
                         <td><strong><?= number_format($p['total'], 2) ?> €</strong></td>
-                        <td style="font-size:0.82rem; color:#7a6a5a; max-width:180px;">
-                            <?= htmlspecialchars($p['notas'] ?? '—') ?>
-                        </td>
                         <td>
-                            <span class="badge-estado <?= $estados[$p['estado']]['badge'] ?>">
-                                <?= $estados[$p['estado']]['icon'] ?>
-                                <?= $estados[$p['estado']]['label'] ?>
+                            <span class="badge-estado <?= $est['badge'] ?>">
+                                <?= $est['icon'] ?> <?= $est['label'] ?>
                             </span>
                         </td>
-                        <td>
-                            <!-- Formulario inline para cambiar estado -->
-                            <form method="POST" action="dashboard_admin.php">
-                                <input type="hidden" name="pedido_id" value="<?= $p['id'] ?>">
-                                <div class="d-flex gap-2 align-items-center">
-                                    <select name="nuevo_estado" class="select-estado">
-                                        <?php foreach ($estados as $val => $cfg): ?>
-                                        <option value="<?= $val ?>"
-                                            <?= $p['estado'] == $val ? 'selected' : '' ?>>
-                                            <?= $cfg['icon'] ?> <?= $cfg['label'] ?>
-                                        </option>
+                    </tr>
+
+                    <!-- Fila detalle (oculta) -->
+                    <tr class="fila-detalle" id="detalle-<?= $p['id'] ?>" style="display:none;">
+                        <td colspan="7">
+                            <div class="detalle-inner">
+
+                                <!-- Tabla de artículos -->
+                                <?php if (!empty($items)): ?>
+                                <p style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; color:#a07a8a; margin-bottom:0;">
+                                    Contenido del pedido
+                                </p>
+                                <table class="tabla-items">
+                                    <thead>
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Categoría</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-end">Precio unit.</th>
+                                            <th class="text-end">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($items as $item): ?>
+                                        <tr>
+                                            <td>
+                                                <strong><?= htmlspecialchars($item['nombre']) ?></strong>
+                                                <?php if ($item['descripcion']): ?>
+                                                    <div style="font-size:0.76rem; color:#a07a8a; margin-top:0.1rem;">
+                                                        <?= htmlspecialchars($item['descripcion']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td style="color:#a07a8a;"><?= htmlspecialchars($item['categoria'] ?? '—') ?></td>
+                                            <td class="text-center"><?= $item['cantidad'] ?></td>
+                                            <td class="text-end"><?= number_format($item['precio_unitario'], 2) ?> €</td>
+                                            <td class="text-end" style="color:#800020; font-weight:600;">
+                                                <?= number_format($item['precio_unitario'] * $item['cantidad'], 2) ?> €
+                                            </td>
+                                        </tr>
                                         <?php endforeach; ?>
-                                    </select>
-                                    <button type="submit" class="btn btn-bordeo btn-sm px-2 py-1"
-                                            style="font-size:0.78rem;">
-                                        Guardar
-                                    </button>
-                                </div>
-                            </form>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4" class="text-end">Total:</td>
+                                            <td class="text-end" style="color:#800020; font-size:1rem;">
+                                                <?= number_format($p['total'], 2) ?> €
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <?php else: ?>
+                                    <p class="text-muted" style="font-size:0.85rem;">Sin artículos registrados.</p>
+                                <?php endif; ?>
+
+                                <!-- Formulario de cambio de estado -->
+                                <form method="POST" action="dashboard_admin.php"
+                                      onclick="event.stopPropagation()">
+                                    <input type="hidden" name="pedido_id" value="<?= $p['id'] ?>">
+                                    <div class="estado-form-inline">
+                                        <span class="estado-form-label">Cambiar estado:</span>
+                                        <select name="nuevo_estado" class="select-estado">
+                                            <?php foreach ($estados as $val => $cfg): ?>
+                                            <option value="<?= $val ?>"
+                                                <?= $p['estado'] == $val ? 'selected' : '' ?>>
+                                                <?= $cfg['icon'] ?> <?= $cfg['label'] ?>
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <div style="flex:1; min-width:180px;">
+                                            <input
+                                                type="text"
+                                                name="notas_inline"
+                                                class="select-estado"
+                                                style="width:100%;"
+                                                placeholder="Nota para el cliente (opcional)"
+                                                value="<?= htmlspecialchars($p['notas'] ?? '') ?>"
+                                            >
+                                        </div>
+
+                                        <button type="submit"
+                                                class="btn btn-bordeo btn-sm px-3"
+                                                style="font-size:0.78rem; white-space:nowrap;">
+                                            💾 Guardar
+                                        </button>
+                                    </div>
+                                </form>
+
+                            </div>
                         </td>
                     </tr>
+
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -417,7 +582,7 @@ $estados = [
 
 <footer class="footer-vino shadow-sm">
     <div class="container footer-container">
-        <a href="index.html" class="footer-brand">Casa Denise</a>
+        <a href="index.php" class="footer-brand">Casa Denise</a>
         <p class="footer-text">© 2024 Laboratorio Dental - Todos los derechos reservados</p>
         <div class="footer-text">
             <span>📍 Calle Dental 123</span>
@@ -427,5 +592,20 @@ $estados = [
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleDetalle(id) {
+    const fila    = document.getElementById('fila-' + id);
+    const detalle = document.getElementById('detalle-' + id);
+    const abierto = detalle.style.display !== 'none';
+
+    if (abierto) {
+        detalle.style.display = 'none';
+        fila.classList.remove('abierta');
+    } else {
+        detalle.style.display = 'table-row';
+        fila.classList.add('abierta');
+    }
+}
+</script>
 </body>
 </html>

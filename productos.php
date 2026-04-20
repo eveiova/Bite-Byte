@@ -1,12 +1,17 @@
 <?php
+// ============================================================
+//  CASA DENISE - Catálogo de productos
+//  Reemplaza productos.php
+//  Coloca en: tu-proyecto/productos.php
+// ============================================================
 
 require_once 'includes/db.php';
 require_once 'includes/auth.php';
 
-// Si no está logueado, redirigir al login y volver aquí después
-requireLogin();
-
-$usuario = usuarioActual();
+// Página pública — no requiere login para ver productos
+// El login solo se exige al finalizar el pedido
+$logueado = estaLogueado();
+$usuario  = $logueado ? usuarioActual() : null;
 
 // Cargar todos los productos disponibles del catálogo
 $stmt = $pdo->query("
@@ -299,24 +304,31 @@ foreach ($productos as $p) {
 <!-- NAVBAR -->
 <header class="p-3 navbar-vino shadow-sm">
     <div class="container d-flex justify-content-between align-items-center">
-        <a href="index.html" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
+        <a href="index.php" class="navbar-brand d-flex align-items-center gap-3 text-decoration-none">
             <div class="logo-brand-text">
                 <div class="brand-name">Casa Denise</div>
                 <div class="brand-sub">Laboratorio Dental</div>
             </div>
         </a>
         <ul class="nav d-none d-md-flex">
-            <li><a href="index.html"    class="nav-link nav-link-vino">Inicio</a></li>
-            <li><a href="trabajos.html" class="nav-link nav-link-vino">Trabajos</a></li>
+            <li><a href="index.php"    class="nav-link nav-link-vino">Inicio</a></li>
+            <li><a href="trabajos.php" class="nav-link nav-link-vino">Trabajos</a></li>
             <li><a href="productos.php" class="nav-link nav-link-vino fw-bold" style="color:#f5d98b !important;">Productos</a></li>
-            <li><a href="dashboard_cliente.php" class="nav-link nav-link-vino">Mi cuenta</a></li>
+            <?php if ($logueado): ?>
+                <li><a href="dashboard_cliente.php" class="nav-link nav-link-vino">Mi cuenta</a></li>
+                <li><a href="logout.php" class="nav-link nav-link-vino">Salir</a></li>
+            <?php else: ?>
+                <li><a href="login.php" class="nav-link nav-link-vino">Iniciar sesión</a></li>
+            <?php endif; ?>
         </ul>
+        <?php if ($logueado): ?>
         <div class="d-flex align-items-center gap-2 d-md-none">
             <span style="color:#f5d98b; font-size:0.8rem;">
                 <?= htmlspecialchars($usuario['nombre']) ?>
             </span>
             <a href="logout.php" style="color:#d4a5b0; font-size:0.8rem;">Salir</a>
         </div>
+        <?php endif; ?>
     </div>
 </header>
 
@@ -325,7 +337,7 @@ foreach ($productos as $p) {
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="index.html" class="text-decoration-none" style="color:#800020;">Inicio</a>
+                <a href="index.php" class="text-decoration-none" style="color:#800020;">Inicio</a>
             </li>
             <li class="breadcrumb-item active">Catálogo de Productos</li>
         </ol>
@@ -462,7 +474,7 @@ foreach ($productos as $p) {
 
 <footer class="footer-vino shadow-sm">
     <div class="container footer-container">
-        <a href="index.html" class="footer-brand">Casa Denise</a>
+        <a href="index.php" class="footer-brand">Casa Denise</a>
         <p class="footer-text">© 2024 Laboratorio Dental - Todos los derechos reservados</p>
         <div class="footer-text">
             <span>📍 Calle Dental 123</span>
@@ -476,6 +488,9 @@ foreach ($productos as $p) {
 // ============================================================
 //  Carrito — lógica cliente
 // ============================================================
+
+// Estado de sesión inyectado desde PHP
+const LOGUEADO = <?= $logueado ? 'true' : 'false' ?>;
 
 let carrito = {}; // { id: { nombre, precio, cantidad } }
 
@@ -560,6 +575,13 @@ function renderCarrito() {
 }
 
 async function finalizarPedido() {
+
+    // Si no está logueado, redirigir al login guardando la URL actual
+    if (!LOGUEADO) {
+        window.location.href = 'login.php?redirect=productos.php';
+        return;
+    }
+
     const btn = document.getElementById('btn-finalizar');
     btn.disabled     = true;
     btn.textContent  = 'Procesando...';

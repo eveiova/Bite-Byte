@@ -3,14 +3,13 @@
 //  CASA DENISE - Guard de autenticación
 //  Coloca este archivo en: tu-proyecto/includes/auth.php
 //
+//  IMPORTANTE: Incluir siempre DESPUÉS de db.php, que es quien
+//  arranca la sesión con la configuración correcta.
+//
 //  USO en cualquier página protegida:
 //      require_once 'includes/auth.php';           // cualquier usuario logueado
 //      require_once 'includes/auth.php'; requireAdmin(); // solo admins
 // ============================================================
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
 
 /**
  * Devuelve true si hay sesión activa.
