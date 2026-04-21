@@ -77,8 +77,8 @@ $usuario  = $logueado ? usuarioActual() : null;
         <a href="index.php" class="footer-brand">Casa Denise</a>
         <p class="footer-text">© 2024 Laboratorio Dental - Todos los derechos reservados</p>
         <div class="footer-text">
-            <span>📍 Calle Dental 123</span>
-            <span class="ms-3">📞 +54 11 1234-5678</span>
+            <span>📍 C/Benito Pérez Galdós 11</span>
+            <span class="ms-3">📞 +34 1234-5678</span>
         </div>
     </div>
 </footer>
