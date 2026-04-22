@@ -1,83 +1,48 @@
-// DATOS
-const fotosTrabajos = ["img/carusel2.png", "img/carusel2.2.png", "img/carusel3.png"];
-const productos = [
-    { id: 1, nombre: "Ceramica Estratificada", precio: 120, img:"img/CERÁMICA ESTRATIFICADA/ceramica2.png" },
-    { id: 2, nombre: "Disilicato", precio: 250, img: "img/DISILICATO/disilicato4.png" },
-    { id: 3, nombre: "Zirconio", precio: 60, img: "img/ZIRCONIO/zirconio1.png" }
-];
-
-let carrito = [];
-
-// RENDERIZAR GALERÍA
-function renderGaleria() {
-    const galeria = document.getElementById("galeriaContainer");
-    if (!galeria) return;
-    galeria.innerHTML = fotosTrabajos.map(foto => `
-        <div class="col-md-4">
-            <div class="card-custom overflow-hidden">
-                <img src="${foto}" class="w-100" style="height:250px; object-fit:cover;">
-            </div>
-        </div>
-    `).join('');
+function togglePassword() {
+    const input = document.getElementById('password');
+    const btn = document.querySelector('.toggle-password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
 }
 
-// RENDERIZAR PRODUCTOS
-function renderProductos() {
-    const container = document.getElementById("productosContainer");
-    if (!container) return;
-    container.innerHTML = productos.map(p => `
-        <div class="col-md-4">
-            <div class="card card-custom p-3 text-center">
-                <img src="${p.img}" class="rounded mb-3">
-                <h5>${p.nombre}</h5>
-                <p class="fw-bold">$${p.precio}</p>
-                <button class="btn btn-bordeo" onclick="agregarCarrito(${p.id})">Agregar</button>
-            </div>
-        </div>
-    `).join('');
+function togglePass(id, btn) {
+    const input = document.getElementById(id);
+    input.type = input.type === 'password' ? 'text' : 'password';
+    btn.textContent = input.type === 'password' ? '👁' : '🙈';
 }
 
-// LÓGICA CARRITO
-function agregarCarrito(id) {
-    const prod = productos.find(p => p.id === id);
-    const item = carrito.find(p => p.id === id);
-    item ? item.cantidad++ : carrito.push({...prod, cantidad: 1});
-    renderCarrito();
+function medirFuerza(password) {
+    const bar = document.getElementById('strengthBar');
+    const text = document.getElementById('strengthText');
+    let puntos = 0;
+    if (password.length >= 8)           puntos++;
+    if (password.length >= 12)          puntos++;
+    if (/[A-Z]/.test(password))         puntos++;
+    if (/[0-9]/.test(password))         puntos++;
+    if (/[^A-Za-z0-9]/.test(password)) puntos++;
+    const niveles = [
+        { pct: '0%',   color: 'transparent', label: '' },
+        { pct: '25%',  color: '#dc3545',     label: '⚠️ Muy débil' },
+        { pct: '50%',  color: '#fd7e14',     label: '🔶 Débil' },
+        { pct: '75%',  color: '#ffc107',     label: '🔷 Aceptable' },
+        { pct: '90%',  color: '#20c997',     label: '✅ Fuerte' },
+        { pct: '100%', color: '#198754',     label: '🔒 Muy fuerte' },
+    ];
+    const nivel = niveles[Math.min(puntos, 5)];
+    bar.style.width      = password.length > 0 ? nivel.pct : '0%';
+    bar.style.background = nivel.color;
+    text.textContent     = password.length > 0 ? nivel.label : '';
+    text.style.color     = nivel.color;
 }
 
-function eliminarProducto(id) {
-    carrito = carrito.filter(p => p.id !== id);
-    renderCarrito();
+function toggleDetalle(id) {
+    const fila = document.getElementById('fila-' + id);
+    const detalle = document.getElementById('detalle-' + id);
+    if (detalle.style.display !== 'none') {
+        detalle.style.display = 'none';
+        fila.classList.remove('abierta');
+    } else {
+        detalle.style.display = 'table-row';
+        fila.classList.add('abierta');
+    }
 }
-
-function renderCarrito() {
-    const container = document.getElementById("carrito");
-    if (!container) return;
-    if (carrito.length === 0) { container.innerHTML = "<p>Vacío</p>"; return; }
-
-    let total = 0;
-    let html = `<table class="table"><thead><tr><th>Producto</th><th>Precio</th><th>Cant.</th><th>Subtotal</th><th></th></tr></thead><tbody>`;
-    
-    carrito.forEach(item => {
-        const sub = item.precio * item.cantidad;
-        total += sub;
-        html += `<tr><td>${item.nombre}</td><td>$${item.precio}</td><td>${item.cantidad}</td><td>$${sub}</td>
-                 <td><button class="btn btn-sm btn-danger" onclick="eliminarProducto(${item.id})">x</button></td></tr>`;
-    });
-
-    html += `</tbody><tfoot><tr><th colspan="3">Total</th><th>$${total}</th><th></th></tr></tfoot></table>`;
-    container.innerHTML = html;
-}
-
-function comprarTodo() {
-    if (carrito.length === 0) return alert("Carrito vacío");
-    alert("¡Pedido realizado con éxito!");
-    carrito = [];
-    renderCarrito();
-}
-
-// INICIO
-document.addEventListener("DOMContentLoaded", () => {
-    renderGaleria();
-    renderProductos();
-});
