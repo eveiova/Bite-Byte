@@ -10,7 +10,7 @@ body {
 }
 
 
-.navbar-vino {
+.navbar-color-vino {
     background: linear-gradient(135deg, #5b0e1f 0%, #3b0a14 100%);
 }
 
@@ -45,7 +45,7 @@ body {
     background: rgb(216, 239, 241);
     padding: 2.5rem;
     border-radius: 20px;
-    margin-top: 2rem;
+    margin-top: 2%;
     border: 1px solid #d4a5b0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
@@ -1407,4 +1407,174 @@ body {
         gap: 10px;
         text-align: center;
     }
+}
+
+.text-pink {
+    color: #d4a5b0;
+}
+
+.text-light-pink {
+    color: #e8c9d0;
+}
+
+.text-gold {
+    color: #f5d98b;
+}
+
+.text-muted-custom {
+    color: #c0a8b0;
+}
+
+.font-small {
+    font-size: 0.85rem;
+}
+
+.font-xs {
+    font-size: 0.72rem;
+}
+
+.letter-spacing {
+    letter-spacing: 1px;
+}
+
+/* NAVBAR */
+.nav-toggler-custom {
+    border-color: #d4a5b0;
+}
+
+.nav-toggler-icon-custom {
+    color: #e8c9d0;
+    font-size: 1.3rem;
+}
+
+/* PANEL */
+.panel-subtitulo {
+    font-size: 0.85rem;
+}
+
+/* FILTROS */
+.filtro-label {
+    font-size: 0.8rem;
+    color: #a07a8a;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* EMPTY */
+.empty-icon {
+    font-size: 2rem;
+}
+
+/* TABLA */
+.col-expand {
+    width: 36px;
+}
+
+.pedido-id {
+    color: #800020;
+}
+
+.cliente-nombre {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cliente-email {
+    font-size: 0.78rem;
+    color: #a07a8a;
+}
+
+.fecha-pedido {
+    font-size: 0.85rem;
+}
+
+.hora-pedido {
+    font-size: 0.75rem;
+    color: #a07a8a;
+}
+
+.items-count {
+    color: #a07a8a;
+}
+
+/* DETALLE */
+.fila-detalle-hidden {
+    display: none;
+}
+
+.detalle-titulo {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a07a8a;
+    margin-bottom: 0;
+}
+
+.item-descripcion {
+    font-size: 0.76rem;
+    color: #a07a8a;
+}
+
+.item-categoria {
+    color: #a07a8a;
+}
+
+.total-color {
+    color: #800020;
+    font-weight: 600;
+}
+
+.total-final {
+    color: #800020;
+    font-size: 1rem;
+}
+
+.sin-articulos {
+    font-size: 0.85rem;
+}
+
+/* FORM */
+.input-wrap {
+    flex: 1;
+    min-width: 180px;
+}
+
+.input-full {
+    width: 100%;
+}
+
+.btn-guardar-custom {
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.map-container {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 2px solid #f0e6ec;
+}
+
+.detalle-pedido-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #a07a8a;
+}
+
+.header-pedido {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #f5d98b;
+}
+
+.cuerpo-pedido {
+    color: #e8c9d0;
+    font-size: 0.88rem;
+}
+
+.footer-pedido {
+    color: #d4a5b0;
+    font-size: 0.72rem;
 }

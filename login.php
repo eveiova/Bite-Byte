@@ -1,54 +1,58 @@
 <?php
 require_once 'config.php';
 
-if (isset($_SESSION['id'])) {
-    if ($_SESSION['rol'] === 'admin') {
-        header('Location: dashboard_admin.php');
-    } else {
-        header('Location: dashboard_cliente.php');
-    }
+// si ya está logado lo mando fuera
+if(isset($_SESSION['id'])){
+    $dest = ($_SESSION['rol'] == 'admin') ? 'dashboard_admin.php' : 'dashboard_cliente.php';
+    header('Location: '.$dest);
     exit;
 }
 
-$error = '';
+$err = '';
 
-if (!empty($_GET['redirect'])) {
+if(!empty($_GET['redirect']))
     $_SESSION['volver_a'] = basename($_GET['redirect']);
-}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email    = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    $email = trim($_POST['email']);
+    $pass  = trim($_POST['password']);
 
-    if (empty($email) || empty($password)) {
-        $error = 'Por favor, completa todos los campos.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'El formato del email no es válido.';
+    if(!$email || !$pass){
+        $err = 'Por favor, completa todos los campos.';
+    } else if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $err = 'El formato del email no es válido.';
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        $q = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
+        $q->execute([$email]);
+        $u = $q->fetch();
 
-        if (!$user) {
-            $error = 'Credenciales incorrectas. Inténtalo de nuevo.';
-        } elseif (!$user['activo']) {
-            $error = 'Tu cuenta está desactivada. Contacta con el laboratorio.';
-        } elseif (!password_verify($password, $user['password_hash'])) {
-            $error = 'Credenciales incorrectas. Inténtalo de nuevo.';
+        if(!$u){
+            $err = 'Credenciales incorrectas. Inténtalo de nuevo.';
+        } elseif(!$u['activo']){
+            $err = 'Tu cuenta está desactivada. Contacta con el laboratorio.';
+        } elseif(!password_verify($pass, $u['password_hash'])){
+            $err = 'Credenciales incorrectas. Inténtalo de nuevo.';
         } else {
             session_regenerate_id(true);
-            $_SESSION['id']     = $user['id'];
-            $_SESSION['nombre'] = $user['nombre'];
-            $_SESSION['email']  = $user['email'];
-            $_SESSION['rol']    = $user['rol'];
+            $_SESSION['id']     = $u['id'];
+            $_SESSION['nombre'] = $u['nombre'];
+            $_SESSION['email']  = $u['email'];
+            $_SESSION['rol']    = $u['rol'];
 
-            $destino = $_SESSION['volver_a'] ?? ($user['rol'] === 'admin' ? 'dashboard_admin.php' : 'dashboard_cliente.php');
-            unset($_SESSION['volver_a']);
+            // redirigir donde estaba o al dashboard
+            if(isset($_SESSION['volver_a'])){
+                $destino = $_SESSION['volver_a'];
+                unset($_SESSION['volver_a']);
+            } else {
+                $destino = ($u['rol'] == 'admin') ? 'dashboard_admin.php' : 'dashboard_cliente.php';
+            }
             header("Location: $destino");
             exit;
         }
     }
 }
+
+$email_prev = htmlspecialchars($_POST['email'] ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -63,56 +67,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 
 <div class="login-wrapper">
-    <div class="login-card">
+  <div class="login-card">
 
-        <a href="index.php" style="text-decoration: none; color: inherit; display: block;">
-            <div class="login-card-header">
-                <div class="logo-brand-text">
-                    <div class="brand-name">Casa Denise</div>
-                    <div class="brand-sub">Laboratorio Dental</div>
-                </div>
-                <p class="mt-3 mb-0" style="color:#d4a5b0; font-size:0.82rem; letter-spacing:1px;">
-                    ACCESO A TU CUENTA
-                </p>
+    <a href="index.php" style="text-decoration:none; color:inherit; display:block">
+        <div class="login-card-header">
+            <div class="logo-brand-text">
+                <div class="brand-name">Casa Denise</div>
+                <div class="brand-sub">Laboratorio Dental</div>
             </div>
-        </a>
-
-        <div class="login-card-body">
-
-            <?php if ($error): ?>
-                <div class="alert-login mb-4">⚠️ <?= htmlspecialchars($error) ?></div>
-            <?php endif; ?>
-
-            <form method="POST" action="login.php" novalidate>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" id="email" name="email" class="form-control"
-                        placeholder="tu@email.com"
-                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                        autocomplete="email" required>
-                </div>
-
-                <div class="mb-4">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <div class="password-wrapper">
-                        <input type="password" id="password" name="password" class="form-control"
-                            placeholder="••••••••" autocomplete="current-password" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword()">👁</button>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-login">Entrar</button>
-            </form>
-
-            <hr style="border-color: #ead8df; margin: 1.8rem 0 1.4rem;">
-
-            <div class="text-center">
-                <span style="font-size:0.85rem; color:#a07a8a;">¿Aún no tienes cuenta?</span>
-                <a href="register.php" class="link-registro ms-2">Regístrate</a>
-            </div>
+            <p class="mt-3 mb-0" style="color:#d4a5b0; font-size:.82rem; letter-spacing:1px">ACCESO A TU CUENTA</p>
         </div>
+    </a>
+
+    <div class="login-card-body">
+
+        <?php if($err): ?>
+            <div class="alert-login mb-4">⚠️ <?= $err ?></div>
+        <?php endif ?>
+
+        <form method="POST" action="login.php" novalidate>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" name="email" id="email" class="form-control"
+                    placeholder="tu@email.com" value="<?= $email_prev ?>"
+                    autocomplete="email" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="password" class="form-label">Contraseña</label>
+                <div class="password-wrapper">
+                    <input type="password" name="password" id="password"
+                        class="form-control" placeholder="••••••••"
+                        autocomplete="current-password" required>
+                    <button type="button" class="toggle-password" onclick="togglePassword()">👁</button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
+
+        <hr style="border-color:#ead8df; margin:1.8rem 0 1.4rem">
+
+        <div class="text-center">
+            <span style="font-size:.85rem; color:#a07a8a">¿Aún no tienes cuenta?</span>
+            <a href="register.php" class="link-registro ms-2">Regístrate</a>
+        </div>
+
     </div>
+  </div>
 </div>
+
 <script src="js/script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

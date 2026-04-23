@@ -78,7 +78,7 @@ $estados = [
 <body>
 
 <header>
-<nav class="navbar navbar-expand-md p-3 navbar-vino shadow-sm">
+<nav class="navbar navbar-expand-md p-3 navbar-color-vino shadow-sm">
     <div class="container">
         <a href="index.php" class="navbar-brand text-decoration-none">
             <div class="brand-name">Casa Denise</div>

@@ -25,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['id'])) {
     }
 }
 
-$estados = [
+// Definir los estados posibles de un pedido con sus configuraciones
+$estadoPedidos = [
     0 => ['label' => 'Pendiente',  'desc' => 'Tu pedido ha sido recibido y está pendiente de revisión.',            'icon' => '⏳', 'color' => '#888',    'bg' => '#f5f5f5'],
     1 => ['label' => 'Aprobado',   'desc' => 'Tu pedido ha sido aprobado y pronto comenzará su fabricación.',        'icon' => '✅', 'color' => '#1e40af', 'bg' => '#dbeafe'],
     2 => ['label' => 'En proceso', 'desc' => 'Tu pedido está siendo fabricado en el laboratorio.',                   'icon' => '⚙️', 'color' => '#854d0e', 'bg' => '#fef9c3'],
@@ -36,7 +37,7 @@ $estados = [
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width">
     <title>Casa Denise - Laboratorio Dental</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@700&family=Josefin+Sans:wght@300;400;700&display=swap" rel="stylesheet">
@@ -45,7 +46,7 @@ $estados = [
 <body>
 
 <header>
-<nav class="navbar navbar-expand-md p-3 navbar-vino shadow-sm">
+<nav class="navbar navbar-expand-md p-3 navbar-color-vino shadow-sm">
     <div class="container">
         <a href="index.php" class="navbar-brand text-decoration-none">
             <div class="brand-name">Casa Denise</div>
@@ -55,7 +56,7 @@ $estados = [
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse" data-bs-target="#menu"
                 style="border-color:#d4a5b0;">
-            <span style="color:#e8c9d0; font-size:1.3rem;">☰</span>
+            <span class="text-light-pink" style="font-size:1.3rem;">&#9776;</span>
         </button>
 
         <div class="collapse navbar-collapse" id="menu">
@@ -147,12 +148,13 @@ $estados = [
     </div>
 </div>
 
+<!-- Sección para consultar el estado de un pedido -->
 <div class="container mb-5">
     <div class="buscar-section">
         <div class="row align-items-start g-4">
 
             <div class="col-lg-5">
-                <div class="buscar-titulo">🔍 Consultar pedido</div>
+                <div class="buscar-titulo">&#128269; Consultar pedido</div>
                 <p class="text-muted mb-3" style="font-size:0.88rem;">
                     Introduce tu número de pedido para ver en qué estado se encuentra.
                 </p>
@@ -186,7 +188,7 @@ $estados = [
                     </div>
 
                 <?php else:
-                    $est = $estados[$pedido['estado']];
+                    $est = $estadoPedidos[$pedido['estado']];
                 ?>
                     <div class="resultado-card">
                         <div class="resultado-header">
@@ -197,9 +199,9 @@ $estados = [
                                 </div>
                             </div>
                             <div class="text-end">
-                                <div style="color:#f5d98b; font-size:0.72rem; letter-spacing:1px;">REALIZADO EL</div>
-                                <div style="color:#e8c9d0; font-size:0.88rem;"><?= date('d/m/Y', strtotime($pedido['created_at'])) ?></div>
-                                <div style="color:#d4a5b0; font-size:0.72rem;">Actualizado: <?= date('d/m/Y H:i', strtotime($pedido['updated_at'])) ?></div>
+                                <div class="header-pedido">REALIZADO EL</div>
+                                <div class="cuerpo-pedido"><?= date('d/m/Y', strtotime($pedido['created_at'])) ?></div>
+                                <div class="footer-pedido">Actualizado: <?= date('d/m/Y H:i', strtotime($pedido['updated_at'])) ?></div>
                             </div>
                         </div>
 
@@ -213,7 +215,7 @@ $estados = [
                             </div>
 
                             <div class="timeline">
-                                <?php foreach ($estados as $val => $cfg): ?>
+                                <?php foreach ($estadoPedidos as $val => $cfg): ?>
                                 <?php $dot = $val < $pedido['estado'] ? 'completado' : ($val == $pedido['estado'] ? 'activo' : ''); ?>
                                 <div class="timeline-step">
                                     <div class="timeline-dot <?= $dot ?>" style="--step-color:<?= $cfg['color'] ?>; --step-bg:<?= $cfg['bg'] ?>;">
@@ -227,7 +229,7 @@ $estados = [
                             </div>
 
                             <?php if (!empty($items)): ?>
-                            <p style="font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; color:#a07a8a; margin-bottom:0.3rem;">Detalle del pedido</p>
+                            <p class="detalle-pedido-title">Detalle del pedido</p>
                             <table class="table tabla-items mb-2">
                                 <thead>
                                     <tr>
@@ -274,7 +276,7 @@ $estados = [
     <div class="buscar-section text-center" style="padding: 2rem;">
         <h3 class="texto-bordeo mb-3">Encuéntranos</h3>
         <p class="text-muted mb-4">📍 C/Benito Pérez Galdós 11</p>
-        <div style="width:100%; border-radius:16px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.1); border:2px solid #f0e6ec;">
+        <div class="map-container">
             <iframe width="100%" height="400" frameborder="0" scrolling="no"
                 src="https://maps.google.com/maps?q=40.424488312165046,-3.564736952675174&hl=es&z=17&output=embed">
             </iframe>
